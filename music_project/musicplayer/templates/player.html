@@ -3,89 +3,145 @@
 {% block title %}Gesture Music Player{% endblock %}
 
 {% block content %}
-  <h1>🎵 Gesture Music Player 🎵</h1>
-  <div id="music-player">
-    <h2>Playlist</h2>
-    <ul id="song-list">
+<h1 class="page-title">🎵 Gesture Music Player 🎵</h1>
+
+<div class="player-container">
+
+  <!-- My Music Playlist -->
+  <div class="playlist-box">
+    <h2>🎶 My Music</h2>
+    <ul id="song-list" class="song-list">
       {% for entry in songs %}
-      <li data-src="{{ entry.song.audio_file.url }}">
-        <span>{{ entry.song.title }} - {{ entry.song.artist }}</span>
+      <li class="song-item" data-src="{{ entry.song.audio_file.url }}" data-title="{{ entry.song.title }}" data-artist="{{ entry.song.artist }}">
+        <span class="song-title">{{ entry.song.title }} - {{ entry.song.artist }}</span>
         <button class="play-button" onclick="playSong(this)">Play/Pause</button>
-        <form action="{% url 'remove_from_my_music' entry.song.id %}" method="post" style="display:inline-block;">
+        <form action="{% url 'remove_from_my_music' entry.song.id %}" method="post" class="remove-form">
           {% csrf_token %}
           <button type="submit" class="remove-button">Remove</button>
         </form>
       </li>
       {% endfor %}
     </ul>
-    <audio id="main-audio" controls autoplay></audio>
   </div>
-  <form method="post" action="{% url 'toggle_gesture' %}">
-    {% csrf_token %}
-    <button type="submit" class="gesture-toggle-button">Toggle Gesture Control</button>
-  </form>
 
-  <script>
-    const audio = document.getElementById('main-audio');
+  <!-- Currently Playing Box -->
+  <div class="now-playing-box">
+    <h2>📻 Now Playing</h2>
+    <p id="now-playing-title">No song playing</p>
+    <p id="now-playing-artist"></p>
+    
+    <audio id="main-audio" class="audio-player" controls autoplay></audio>
 
-    function playSong(btn) {
-        const li = btn.closest('li');
-        const songSrc = li.getAttribute('data-src');
-        if (audio.src !== window.location.origin + songSrc) {
-            audio.src = songSrc;
-            audio.play();
-        } else {
-            if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
-            }
-        }
+    <!-- Player Controls -->
+    <div class="player-controls">
+      <button onclick="playPrevious()" class="control-button">PREV</button>
+      <button onclick="togglePlayPause()" class="control-button">PLAY/PAUSE</button>
+      <button onclick="playNext()" class="control-button">NEXT</button>
+    </div>
+
+    <div class="options">
+      <label><input type="checkbox" id="shuffle-toggle"> 🔀 Shuffle</label>
+      <label><input type="checkbox" id="repeat-toggle"> 🔁 Repeat</label>
+    </div>
+  </div>
+
+</div>
+
+<!-- Gesture Toggle Button -->
+<form method="post" action="{% url 'toggle_gesture' %}" class="gesture-form">
+  {% csrf_token %}
+  <button type="submit" class="gesture-toggle-button">Toggle Gesture Control</button>
+</form>
+
+<script>
+  const audio = document.getElementById('main-audio');
+//   const volumeSlider = document.getElementById('volume-slider');
+//   const progressSlider = document.getElementById('progress-slider');
+  const shuffleToggle = document.getElementById('shuffle-toggle');
+  const repeatToggle = document.getElementById('repeat-toggle');
+
+  const nowPlayingTitle = document.getElementById('now-playing-title');
+  const nowPlayingArtist = document.getElementById('now-playing-artist');
+
+  const songListItems = Array.from(document.querySelectorAll('#song-list li'));
+
+  let currentSongIndex = -1;
+
+  function updateNowPlaying(title, artist) {
+    nowPlayingTitle.textContent = title;
+    nowPlayingArtist.textContent = artist;
+  }
+
+  function playSong(button) {
+    const li = button.closest('li');
+    const songSrc = li.getAttribute('data-src');
+    const title = li.getAttribute('data-title');
+    const artist = li.getAttribute('data-artist');
+
+    currentSongIndex = songListItems.indexOf(li);
+
+    if (audio.src !== window.location.origin + songSrc) {
+      audio.src = songSrc;
+      audio.play();
+    } else {
+      audio.paused ? audio.play() : audio.pause();
     }
 
-    audio.addEventListener('play', () => {
-        document.querySelectorAll('#song-list li').forEach(li => li.classList.remove('playing'));
-        const currentLi = Array.from(document.querySelectorAll('#song-list li'))
-            .find(li => window.location.origin + li.getAttribute('data-src') === audio.src);
-        if (currentLi) currentLi.classList.add('playing');
-    });
+    updateNowPlaying(title, artist);
+  }
 
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/gesture/");
+  function togglePlayPause() {
+    audio.paused ? audio.play() : audio.pause();
+  }
 
-    socket.onopen = function() {
-        console.log("✅ [Frontend] WebSocket is open");
-    };
+  function playNext() {
+    if (shuffleToggle.checked) {
+      currentSongIndex = Math.floor(Math.random() * songListItems.length);
+    } else {
+      currentSongIndex = (currentSongIndex + 1) % songListItems.length;
+    }
+    songListItems[currentSongIndex]?.querySelector('.play-button')?.click();
+  }
 
-    socket.onmessage = function(event) {
-        console.log("📨 [Frontend] Raw message received:", event.data);
-        const data = JSON.parse(event.data);
-        const action = data.action;
-        console.log("👂 [Frontend] Received gesture action:", action);
-        if (action === "play") {
-            audio.play();
-        } else if (action === "pause") {
-            audio.pause();
-        } else if (action === "next") {
-            const currentLi = document.querySelector('#song-list li.playing');
-            const nextLi = currentLi?.nextElementSibling || document.querySelector('#song-list li');
-            nextLi?.querySelector('button')?.click();
-        } else if (action === "previous") {
-            const currentLi = document.querySelector('#song-list li.playing');
-            const prevLi = currentLi?.previousElementSibling || document.querySelector('#song-list li:last-child');
-            prevLi?.querySelector('button')?.click();
-        } else if (action === "volume_up") {
-            audio.volume = Math.min(audio.volume + 0.1, 1);
-        } else if (action === "volume_down") {
-            audio.volume = Math.max(audio.volume - 0.1, 0);
-        }
-    };
+  function playPrevious() {
+    currentSongIndex = (currentSongIndex - 1 + songListItems.length) % songListItems.length;
+    songListItems[currentSongIndex]?.querySelector('.play-button')?.click();
+  }
 
-    socket.onerror = function(error) {
-        console.error("❗ [Frontend] WebSocket error:", error);
-    };
+//   volumeSlider.addEventListener('input', () => {
+//     audio.volume = parseFloat(volumeSlider.value);
+//   });
 
-    socket.onclose = function(event) {
-        console.log("❌ [Frontend] WebSocket closed:", event);
-    };
-  </script>
+//   audio.addEventListener('timeupdate', () => {
+//     progressSlider.value = (audio.currentTime / audio.duration) * 100 || 0;
+//   });
+
+//   progressSlider.addEventListener('input', () => {
+//     audio.currentTime = (progressSlider.value / 100) * audio.duration;
+//   });
+
+  audio.addEventListener('ended', () => {
+    if (repeatToggle.checked) {
+      audio.currentTime = 0;
+      audio.play();
+    } else {
+      playNext();
+    }
+  });
+
+  // Gesture socket
+  const socket = new WebSocket("ws://" + window.location.host + "/ws/gesture/");
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const action = data.action;
+    console.log("👂 [Frontend] Received gesture action:", action);
+
+    if (action === "play") togglePlayPause();
+    else if (action === "pause") audio.pause();
+    else if (action === "next") playNext();
+    else if (action === "previous") playPrevious();
+    else if (action === "volume_up") audio.volume = Math.min(audio.volume + 0.1, 1);
+    else if (action === "volume_down") audio.volume = Math.max(audio.volume - 0.1, 0);
+  };
+</script>
 {% endblock %}
