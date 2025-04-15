@@ -7,10 +7,14 @@
   <div id="music-player">
     <h2>Playlist</h2>
     <ul id="song-list">
-      {% for song in songs %}
-      <li data-src="{{ song.file.url }}">
-        <span>{{ song.title }}</span>
-        <button onclick="playSong(this)">Play</button>
+      {% for entry in songs %}
+      <li data-src="{{ entry.song.audio_file.url }}">
+        <span>{{ entry.song.title }} - {{ entry.song.artist }}</span>
+        <button class="play-button" onclick="playSong(this)">Play/Pause</button>
+        <form action="{% url 'remove_from_my_music' entry.song.id %}" method="post" style="display:inline-block;">
+          {% csrf_token %}
+          <button type="submit" class="remove-button">Remove</button>
+        </form>
       </li>
       {% endfor %}
     </ul>
