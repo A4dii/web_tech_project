@@ -3,14 +3,19 @@ from .forms import SongUploadForm
 from .models import Song, MyMusic
 import subprocess
 import os
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def home(request):
-    return render(request, 'home.html')
+    return render(request, "home.html", {"user": request.user})
 
+@login_required
 def music_library(request):
     songs = Song.objects.all()
     return render(request, 'music_library.html', {'songs': songs})
 
+@login_required
 def upload_song(request):
     if request.method == 'POST':
         form = SongUploadForm(request.POST, request.FILES)
@@ -21,17 +26,37 @@ def upload_song(request):
         form = SongUploadForm()
     return render(request, 'upload.html', {'form': form})
 
+@login_required
 def add_to_my_music(request, song_id):
-    song = get_object_or_404(Song, id=song_id)
-    if request.method == 'POST':
-        if not MyMusic.objects.filter(song=song).exists():
-            MyMusic.objects.create(song=song)
+    # Get the song using the provided song_id
+    song = Song.objects.get(id=song_id)
+    user = request.user  # Get the current logged-in user
+    
+    # Check if the user has already added this song to MyMusic
+    if not MyMusic.objects.filter(user=user, song=song).exists():
+        # Add the song to MyMusic for this user
+        mymusic_entry = MyMusic(user=user, song=song)
+        mymusic_entry.save()
+        print(f"Song '{song.title}' added to {user.username}'s My Music.")
+    else:
+        print(f"Song '{song.title}' is already in {user.username}'s My Music.")
+    
+    # Redirect to the music library after adding
     return redirect('music_library')
 
-def player(request):
-    my_songs = MyMusic.objects.select_related('song').all()
-    return render(request, 'player.html', {'songs': my_songs})
+# def player(request):
+#     my_songs = MyMusic.objects.select_related('song').all()
+#     return render(request, 'player.html', {'songs': my_songs})
 
+@login_required
+def player(request):
+    if request.user.is_authenticated:
+        my_music = MyMusic.objects.filter(user=request.user)
+    else:
+        my_music = None
+    return render(request, "player.html", {"songs": my_music})
+
+@login_required
 def remove_from_my_music(request, song_id):
     # Ensure removal only occurs via POST (best practice)
     if request.method == "POST":
@@ -63,6 +88,7 @@ import signal
 
 gesture_process = None  # Global process tracker
 
+@login_required
 def toggle_gesture(request):
     global gesture_process
 
@@ -80,12 +106,6 @@ def toggle_gesture(request):
 
                 GESTURE_SCRIPT_PATH = '/home/aadi/Documents/sixth_sem/projects/web_tech_project/web2/pyrunner/realtime_gesture_control.py'
 
-                # gesture_process = subprocess.Popen(
-                #     ['python3', GESTURE_SCRIPT_PATH],
-                #     stdout=subprocess.PIPE,
-                #     stderr=subprocess.PIPE,
-                #     preexec_fn=os.setsid
-                # )
                 gesture_process = subprocess.Popen(
                     ['python3', GESTURE_SCRIPT_PATH],
                     stdout=None,  # Send output to terminal
@@ -98,3 +118,27 @@ def toggle_gesture(request):
             print("❌ Error while toggling gesture script:", e)
 
     return redirect('player')
+
+# def signup(request):
+#     if request.method == "POST":
+#         form = UserCreationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("login")
+#     else:
+#         form = UserCreationForm()
+#     return render(request, "signup.html", {"form": form})
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        print("POST data:", request.POST)
+        if form.is_valid():
+            form.save()
+            print("User created successfully!")
+            return redirect("login")
+        else:
+            print("Form errors:", form.errors)
+    else:
+        form = UserCreationForm()
+    return render(request, "signup.html", {"form": form})

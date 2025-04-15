@@ -12,10 +12,19 @@
     <nav>
         <div class="logo">🎵 Gesture Music</div>
         <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'upload' %}">Upload</a></li>
-            <li><a href="{% url 'player' %}">Player</a></li>
-            <li><a href="{% url 'music_library' %}">Library</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'upload' %}">Upload</a></li>
+                <li><a href="{% url 'player' %}">Player</a></li>
+                <li><a href="{% url 'music_library' %}">Library</a></li>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <li><button type="submit" style="all: unset; cursor: pointer;">Logout</button></li>
+                </form>
+            {% else %}
+                <li><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="{% url 'signup' %}">Sign Up</a></li>
+            {% endif %}
         </ul>
     </nav>
 

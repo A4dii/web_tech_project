@@ -407,3 +407,69 @@ body {
   cursor: pointer;
 }
 
+
+h2 {
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+form label {
+  color: #f0f0f0;
+}
+
+form input {
+  background-color: #2c2f33;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 10px;
+  transition: border-color 0.3s;
+}
+
+form input:focus {
+  border-color: #00d1ff;
+  outline: none;
+  box-shadow: 0 0 8px #00d1ff88;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00d1ff, #0088ff);
+  border: none;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #00ff88, #00c96b);
+  border: none;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+  transition: 0.2s ease;
+}
+
+a {
+  color: #00d1ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Subtle entrance animation */
+@keyframes fadeInUp {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
