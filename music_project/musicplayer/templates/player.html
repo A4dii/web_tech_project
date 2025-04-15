@@ -20,6 +20,10 @@
     </ul>
     <audio id="main-audio" controls autoplay></audio>
   </div>
+  <form method="post" action="{% url 'toggle_gesture' %}">
+    {% csrf_token %}
+    <button type="submit" class="gesture-toggle-button">Toggle Gesture Control</button>
+  </form>
 
   <script>
     const audio = document.getElementById('main-audio');

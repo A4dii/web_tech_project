@@ -16,24 +16,31 @@ body {
   
   /* Navbar */
   nav {
-    background: #ff007f; /* Hot pink */
+    background: linear-gradient(90deg, #ff007f, #ff4da6); /* Pink gradient */
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #fff; /* Optionally add a white underline */
+    border-bottom: 3px solid #fff;
+    box-shadow: 0 6px 18px rgba(255, 0, 127, 0.4);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
   }
   
   nav .logo {
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
     color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    letter-spacing: 2px;
   }
   
   nav ul {
     list-style: none;
     display: flex;
-    gap: 20px;
+    gap: 24px;
     margin: 0;
     padding: 0;
   }
@@ -41,12 +48,16 @@ body {
   nav ul li a {
     color: #fff;
     text-decoration: none;
-    font-size: 1rem;
-    transition: opacity 0.3s ease;
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: background 0.3s ease, transform 0.2s ease;
   }
   
   nav ul li a:hover {
-    opacity: 0.8;
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
   }
   
   /* Library Page Styles */
@@ -226,3 +237,20 @@ body {
     background: #ff007f;
     color: #fff;
 }
+
+.gesture-toggle-button {
+    background-color: #ff007f;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 30px;
+    margin: 20px auto;
+    cursor: pointer;
+    display: block;
+    transition: background 0.3s ease;
+  }
+  .gesture-toggle-button:hover {
+    background-color: #e6006f;
+  }
+  
