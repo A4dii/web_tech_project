@@ -1,16 +1,20 @@
-# musicplayer/views.py
 from django.shortcuts import render, redirect
-from .models import Song
 from .forms import SongForm
+from .models import Song
 
 def home(request):
+    return render(request, 'home.html')
+
+def upload_song(request):
     if request.method == 'POST':
         form = SongForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('home')
+            return redirect('player')
     else:
         form = SongForm()
+    return render(request, 'upload.html', {'form': form})
 
+def player(request):
     songs = Song.objects.all()
-    return render(request, 'musicplayer/home.html', {'form': form, 'songs': songs})
+    return render(request, 'player.html', {'songs': songs})

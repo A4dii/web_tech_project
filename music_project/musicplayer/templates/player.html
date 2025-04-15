@@ -1,53 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Gesture Music Player</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-    input[type="file"], input[type="text"] {
-      margin: 10px;
-    }
-    #music-player {
-      background: linear-gradient(135deg, #1db954, #191414);
-      padding: 20px;
-      border-radius: 16px;
-      color: white;
-      max-width: 500px;
-      margin: 40px auto;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
-    #song-list li {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.1);
-      transition: background-color 0.3s ease;
-    }
-    #song-list li.playing {
-      background-color: rgba(255, 255, 255, 0.3);
-      font-weight: bold;
-    }
-    audio {
-      width: 100%;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Gesture Music Player{% endblock %}
+
+{% block content %}
   <h1>🎵 Gesture Music Player 🎵</h1>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload Song</button>
-  </form>
   <div id="music-player">
     <h2>Playlist</h2>
     <ul id="song-list">
@@ -60,6 +16,7 @@
     </ul>
     <audio id="main-audio" controls autoplay></audio>
   </div>
+
   <script>
     const audio = document.getElementById('main-audio');
 
@@ -85,7 +42,6 @@
         if (currentLi) currentLi.classList.add('playing');
     });
 
-    // Create the global WebSocket and attach event handlers.
     const socket = new WebSocket("ws://" + window.location.host + "/ws/gesture/");
 
     socket.onopen = function() {
@@ -95,7 +51,7 @@
     socket.onmessage = function(event) {
         console.log("📨 [Frontend] Raw message received:", event.data);
         const data = JSON.parse(event.data);
-        const action = data.action;   // Use the key 'action'
+        const action = data.action;
         console.log("👂 [Frontend] Received gesture action:", action);
         if (action === "play") {
             audio.play();
@@ -124,5 +80,4 @@
         console.log("❌ [Frontend] WebSocket closed:", event);
     };
   </script>
-</body>
-</html>
+{% endblock %}
