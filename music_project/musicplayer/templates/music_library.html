@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Music Library{% endblock %}
+{% block content %}
+<h2 class="library-title">Music Library</h2>
+  <div class="library-container">
+      {% for song in songs %}
+        <div class="song-card">
+          <div class="song-info">
+            <p class="song-title">{{ song.title }}</p>
+            <p class="song-artist">{{ song.artist }}</p>
+          </div>
+          <form action="{% url 'add_to_my_music' song.id %}" method="post" style="margin:0;">
+             {% csrf_token %}
+             <button type="submit" class="add-button">Add to My Music</button>
+          </form>
+        </div>
+      {% empty %}
+        <p>No songs available in the library.</p>
+      {% endfor %}
+  </div>
+{% endblock %}

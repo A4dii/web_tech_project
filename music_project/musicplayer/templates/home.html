@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Gesture Music{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="welcome-card">
+        <h1 class="welcome-title">Welcome, {{ user.username }} 👋</h1>
+        <h2 class="welcome-subtitle">Gesture-Controlled Music Experience 🎶</h2>
+        <p class="welcome-text">
+            Enjoy hands-free control of your favorite tracks.  
+            Use simple hand gestures to <strong>play, pause, skip</strong> tracks, or adjust the <strong>volume</strong> like a DJ!
+        </p>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🖐️ Gesture Control</h3>
+                <p>Control your music with hand gestures using your webcam.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎵 Personal Playlist</h3>
+                <p>Add your favorite tracks to "My Music" and manage them easily.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📤 Upload Songs</h3>
+                <p>Upload your own music and build your personal library.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎧 Intuitive Player</h3>
+                <p>Enjoy a beautiful player with shuffle, repeat, and queue support.</p>
+            </div>
+        </div>
+        <div class="start-btns">
+            <a href="{% url 'player' %}" class="btn start-btn">🎵 Launch Music Player</a>
+            <a href="{% url 'upload' %}" class="btn upload-btn">📤 Upload New Song</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
